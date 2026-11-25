@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=Desk Phone
+Comment=Answer your phone's calls on this computer
+Exec=@LAUNCHER@ %u
+Icon=io.github.yairhinkis.DeskPhone
+Terminal=false
+Categories=Utility;Telephony;
+Keywords=phone;call;bluetooth;dial;handsfree;
+StartupNotify=false
+MimeType=x-scheme-handler/tel;x-scheme-handler/callto;
+StartupWMClass=io.github.yairhinkis.DeskPhone
+Actions=settings;quit;
+
+[Desktop Action settings]
+Name=Settings
+Exec=@LAUNCHER@ --settings
+
+[Desktop Action quit]
+Name=Quit
+Exec=@LAUNCHER@ --quit
