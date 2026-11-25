@@ -2,7 +2,9 @@
 
 Getting the keyboard. On Wayland a window can't take the keyboard by itself, and the phone key
 hands the app no token to ask with, so the dialer opened by the key stayed without it: what you
-typed went to the window you were in. Hyprland is asked to focus the card instead.
+typed went to the window you were in. Hyprland is asked to focus the card instead: when the
+dialer opens, or when the key asks for the card during a call. Answering a call doesn't do it,
+so the keyboard stays with what you were typing.
 
 Giving it back. The card is pinned, so it shows on every workspace. Hyprland keeps a pinned window that has the
 keyboard on the regular workspace, also while a special workspace (Omarchy's scratchpad, Super+S)

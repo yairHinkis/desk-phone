@@ -829,7 +829,9 @@ class CallCard(Gtk.Window):
         self.set_accept_focus(wants_focus)
         self.set_focus_on_map(m.mode == "idle")
         if m.focus and m.mode == "call":
-            GLib.idle_add(self.focus_now)     # answered here: digits typed now go into the call
+            # answered here: digits typed now go into the call. Not on Hyprland, where this would
+            # take the keyboard from what you're typing; click the card (or Shift + the phone key).
+            GLib.idle_add(self.focus_now, False)
         self._grow_if_needed()
         appearing = not self.get_visible() or self._hiding()
         if appearing:
@@ -868,7 +870,7 @@ class CallCard(Gtk.Window):
         self.banner_rev.show()
         self.banner_rev.set_reveal_child(True)
 
-    def focus_now(self):
+    def focus_now(self, ask_hyprland=True):
         """present() with a fresh X server time: opened by a global key, the window carries no
         user event, and mutter's focus-stealing prevention would otherwise leave it unfocused."""
         try:
@@ -881,7 +883,7 @@ class CallCard(Gtk.Window):
         except (ImportError, ValueError, TypeError):
             pass
         self.present()
-        if on_hyprland() and not self._asking_hyprland:
+        if ask_hyprland and on_hyprland() and not self._asking_hyprland:
             # a window that was only just shown isn't known to Hyprland yet: ask a few times
             tries = [15]
 
