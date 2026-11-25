@@ -1,6 +1,10 @@
 """What Desk Phone asks of Hyprland while it runs (the keys and window rules are in shortcuts.py).
 
-The card is pinned, so it shows on every workspace. Hyprland keeps a pinned window that has the
+Getting the keyboard. On Wayland a window can't take the keyboard by itself, and the phone key
+hands the app no token to ask with, so the dialer opened by the key stayed without it: what you
+typed went to the window you were in. Hyprland is asked to focus the card instead.
+
+Giving it back. The card is pinned, so it shows on every workspace. Hyprland keeps a pinned window that has the
 keyboard on the regular workspace, also while a special workspace (Omarchy's scratchpad, Super+S)
 is open above it. When that window then goes away, Hyprland gives the keyboard to the next window
 of the regular workspace, and that closes the special workspace: clicking the card's × threw you
@@ -50,6 +54,24 @@ def window_to_return_to(active: dict, monitors: list, clients: list, pid: int) -
     if not there:
         return None
     return min(there, key=lambda c: c.get("focusHistoryID", 1 << 30)).get("address")
+
+
+def focus_own_window(title: str) -> bool:
+    """Gives the keyboard to this app's window with that title. False while Hyprland doesn't
+    list the window yet (it was only just shown): ask again in a moment."""
+    if not on_hyprland():
+        return True
+    try:
+        me = os.getpid()
+        window = next((c for c in _ask("clients") if c.get("pid") == me and c.get("title") == title
+                       and c.get("mapped", True)), None)
+        if window is None:
+            return False
+        if not _focus(window["address"]):
+            log.info("hyprland: couldn't give the keyboard to %s", title)
+    except (OSError, subprocess.SubprocessError, ValueError, AttributeError, TypeError, KeyError) as e:
+        log.info("hyprland: %s", e)
+    return True
 
 
 def hand_focus_back():

@@ -23,7 +23,7 @@ from .. import APP_NAME
 from ..contacts import match_key
 from ..controller import format_number
 from ..history import describe, format_when
-from ..hyprland import hand_focus_back
+from ..hyprland import focus_own_window, hand_focus_back, on_hyprland
 from .theme import css_rgba, watcher
 
 WIDTH = 320                    # the card itself
@@ -302,6 +302,7 @@ class CallCard(Gtk.Window):
         self._win_h = WIN_H
         self._fade = None              # the running show/hide Tween
         self._shown = 0.0              # 0 = hidden, 1 = fully in
+        self._asking_hyprland = False  # focus_now is asking Hyprland for the keyboard
         self._tick_id = 0
         self._levels = [0.0, 0.0]      # what the meter reported (them, you)
         self._shown_levels = [0.0, 0.0]  # what's drawn (falls back slowly)
@@ -880,6 +881,18 @@ class CallCard(Gtk.Window):
         except (ImportError, ValueError, TypeError):
             pass
         self.present()
+        if on_hyprland() and not self._asking_hyprland:
+            # a window that was only just shown isn't known to Hyprland yet: ask a few times
+            tries = [15]
+
+            def ask():
+                tries[0] -= 1
+                again = (self.get_visible() and not self._hiding() and tries[0] > 0
+                         and not focus_own_window(self.get_title()))
+                self._asking_hyprland = again
+                return again
+            self._asking_hyprland = True
+            GLib.timeout_add(40, ask)
 
     # -- appearing and leaving ------------------------------------------------------------------
     def _hiding(self):

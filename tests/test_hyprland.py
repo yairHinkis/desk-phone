@@ -51,3 +51,24 @@ def test_hand_focus_back_asks_hyprland_and_survives_its_absence(monkeypatch):
         raise FileNotFoundError("hyprctl")
     monkeypatch.setattr(hyprland, "_hyprctl", gone)
     hyprland.hand_focus_back()                            # no hyprctl: no error
+
+
+def test_focus_own_window_waits_until_hyprland_lists_it(monkeypatch):
+    import json
+    asked, clients = [], []
+
+    def hyprctl(*args):
+        asked.append(args)
+        return "ok" if args[0] == "dispatch" else json.dumps(clients)
+    monkeypatch.setattr(hyprland.os, "getpid", lambda: ME)
+    monkeypatch.setattr(hyprland, "_hyprctl", hyprctl)
+    monkeypatch.setenv("HYPRLAND_INSTANCE_SIGNATURE", "x")
+    assert hyprland.focus_own_window("Desk Phone") is False           # not shown yet: ask again
+    clients += [{"address": "0x5", "pid": ME, "title": "Desk Phone Settings"},
+                {"address": "0x6", "pid": 7, "title": "Desk Phone"},
+                {"address": "0x7", "pid": ME, "title": "Desk Phone"}]
+    assert hyprland.focus_own_window("Desk Phone") is True
+    assert asked[-1][0] == "dispatch" and "address:0x7" in asked[-1][1]
+    monkeypatch.delenv("HYPRLAND_INSTANCE_SIGNATURE")
+    asked.clear()
+    assert hyprland.focus_own_window("Desk Phone") is True and asked == []
