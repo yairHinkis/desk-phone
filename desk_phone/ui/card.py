@@ -23,6 +23,7 @@ from .. import APP_NAME
 from ..contacts import match_key
 from ..controller import format_number
 from ..history import describe, format_when
+from ..hyprland import hand_focus_back
 from .theme import css_rgba, watcher
 
 WIDTH = 320                    # the card itself
@@ -910,6 +911,7 @@ class CallCard(Gtk.Window):
     def _animate_out(self):
         if not self.get_visible() or self._hiding():
             return
+        hand_focus_back()              # (Hyprland: or closing the card closes the scratchpad)
         if self._fade:
             self._fade.cancel()
         start = self._shown

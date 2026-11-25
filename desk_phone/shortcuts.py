@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 from . import APP_ID, APP_NAME
+from .hyprland import on_hyprland
 
 MEDIA_KEYS = "org.gnome.settings-daemon.plugins.media-keys"
 CUSTOM = MEDIA_KEYS + ".custom-keybinding"
@@ -121,8 +122,6 @@ HYPR_END = "-- <<< desk-phone <<<"
 HYPR_MODS = {"": "", "<Shift>": "SHIFT + ", "<Primary>": "CTRL + "}
 
 
-def on_hyprland() -> bool:
-    return bool(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"))
 
 
 def on_omarchy() -> bool:
